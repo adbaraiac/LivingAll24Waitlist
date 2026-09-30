@@ -26,6 +26,17 @@ jobs:
           node-version: 20
           cache: npm
 
+      # Without the endpoint the form runs in demo mode: visitors see
+      # "You're in." but nothing is saved. Refuse to deploy that.
+      - name: Check waitlist endpoint is configured
+        env:
+          WAITLIST_ENDPOINT: ${{ vars.WAITLIST_ENDPOINT }}
+        run: |
+          if [ -z "$WAITLIST_ENDPOINT" ]; then
+            echo "::error::Repo variable WAITLIST_ENDPOINT is not set. Add it under Settings > Secrets and variables > Actions > Variables, then re-run."
+            exit 1
+          fi
+
       - name: Install dependencies
         run: npm ci
 
