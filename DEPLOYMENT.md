@@ -12,8 +12,9 @@ Do the AWS part first, because you need its URL for the website config.
 ## Part 1 — AWS backend (email notifications + storage)
 
 This creates: a DynamoDB table (stores emails), a Lambda function (handles
-signups), and an API Gateway URL (what the website calls). Cost at waitlist
-volume is effectively **$0** (all within AWS free tier / pay-per-request).
+signups), an API Gateway URL (what the website calls), and an SNS topic that
+emails you each signup. Cost at waitlist volume is effectively **$0** (all
+within AWS free tier / pay-per-request).
 
 ### 1.1 Install the tools (one time)
 
@@ -30,19 +31,7 @@ aws sts get-caller-identity
 sam --version
 ```
 
-### 1.2 Verify your email with SES (so it can email you)
-
-SES starts in "sandbox" mode, which is fine for notifications to yourself —
-you just have to verify the address first.
-
-1. Open the [SES console](https://console.aws.amazon.com/ses/) → pick a region
-   near you (e.g. **us-east-1**). Remember this region.
-2. **Verified identities → Create identity → Email address** → enter your email
-   (e.g. `you@example.com`) → check your inbox → click the verify link.
-
-That address will be both the sender and the recipient of signup alerts.
-
-### 1.3 Deploy
+### 1.2 Deploy
 
 From the `aws/` folder:
 
@@ -55,9 +44,8 @@ sam deploy --guided
 Answer the prompts:
 
 - **Stack Name:** any name you like (e.g. `my-waitlist`)
-- **AWS Region:** the same region you verified SES in (e.g. `us-east-1`)
-- **Parameter NotifyEmail:** your verified email
-- **Parameter SenderEmail:** leave blank (uses NotifyEmail)
+- **AWS Region:** e.g. `us-east-1`
+- **Parameter NotifyEmail:** the email that should get signup alerts
 - **Parameter AllowedOrigin:** `*` for now (tighten later — see 3.2)
 - Allow SAM to create roles: **Y**
 - Save arguments to config file: **Y**
@@ -71,7 +59,16 @@ https://abc123xyz.execute-api.us-east-1.amazonaws.com/waitlist
 
 That's your backend. Re-deploys later are just `sam build && sam deploy`.
 
-### 1.4 Test it
+**Confirm the alert subscription:** the first deploy makes AWS send an email
+titled "AWS Notification - Subscription Confirmation" to `NotifyEmail`. Click
+**Confirm subscription** in it. No alerts are sent until you do.
+
+> Why SNS and not SES? SES would send alerts "from" your own address. For a
+> gmail.com address, Gmail sees mail claiming to be from gmail.com that Google
+> didn't send and files it as spam. SNS alerts come from AWS's own
+> authenticated domain, so they reach the inbox without you owning a domain.
+
+### 1.3 Test it
 
 ```bash
 curl -X POST https://abc123xyz.execute-api.us-east-1.amazonaws.com/waitlist \
@@ -82,10 +79,9 @@ curl -X POST https://abc123xyz.execute-api.us-east-1.amazonaws.com/waitlist \
 You should get `{"ok":true}` and an email within a minute. Signups appear in
 DynamoDB → Tables → `<stack-name>-signups` → Explore items.
 
-> **When you're ready for real traffic:** if you ever want to email *signups*
-> (not just yourself), request SES production access (SES console → Account
-> dashboard → Request production access). For just notifying yourself, sandbox
-> mode is fine.
+> **Heads-up:** every alert email has an "unsubscribe" link at the bottom.
+> Clicking it stops all alerts. If that happens, re-run the deploy and confirm
+> the new subscription email.
 
 ---
 
@@ -111,7 +107,7 @@ New repository variable**. Add one:
 
 | Name                | Value                                    |
 | ------------------- | ---------------------------------------- |
-| `WAITLIST_ENDPOINT` | the `WaitlistEndpoint` URL from step 1.3 |
+| `WAITLIST_ENDPOINT` | the `WaitlistEndpoint` URL from step 1.2 |
 
 > The base path is set automatically to `/<repo-name>`, because GitHub serves
 > the site at `https://<username>.github.io/<repo-name>/`. If you later move to
@@ -179,8 +175,10 @@ These land in the notification email and DynamoDB with each signup.
 
 ## Troubleshooting
 
-- **No email arrives:** the address isn't SES-verified, or you're emailing an
-  address other than the verified one while in the SES sandbox. Verify it.
+- **No alert email arrives:** the SNS subscription isn't confirmed (SNS console
+  → Subscriptions → status must be "Confirmed", not "PendingConfirmation"), or
+  you clicked an alert's unsubscribe link. Check the function's CloudWatch logs
+  for "Notification published" (sent) or "SNS notify error".
 - **Form says "Something went wrong":** `WAITLIST_ENDPOINT` variable is wrong or
   CORS `AllowedOrigin` doesn't match your site origin. Check the browser console.
 - **Site 404s / no styles:** the base path doesn't match where the site is

@@ -1,27 +1,31 @@
 // Waitlist signup handler.
 //
-// Runtime: Node.js 20.x (AWS SDK v3 is preinstalled in the Lambda runtime).
+// Runtime: Node.js 24.x (AWS SDK v3 is preinstalled in the Lambda runtime).
 // Trigger: API Gateway HTTP API (POST /waitlist).
 //
 // Responsibilities:
 //   1. Validate the incoming email.
 //   2. Store the signup in DynamoDB (idempotent — duplicate emails return 409).
-//   3. Email you a notification via SES so you see signups in real time.
+//   3. Publish a notification to an SNS topic, which emails you each signup.
+//
+// Why SNS and not SES: SES must send "from" an address you verified. With a
+// gmail.com sender, Gmail sees mail claiming to be from gmail.com that Google
+// didn't send, and files it as spam. SNS email comes from AWS's own
+// authenticated domain, so it reaches the inbox without owning a domain.
 //
 // Configuration comes entirely from environment variables (set by the SAM
 // template). Nothing is hardcoded.
 
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb";
-import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
+import { SNSClient, PublishCommand } from "@aws-sdk/client-sns";
 
 const TABLE = process.env.TABLE_NAME;
-const NOTIFY_TO = process.env.NOTIFY_EMAIL; // where signup alerts are sent
-const NOTIFY_FROM = process.env.SENDER_EMAIL || process.env.NOTIFY_EMAIL; // verified SES identity
+const NOTIFY_TOPIC_ARN = process.env.NOTIFY_TOPIC_ARN; // SNS topic with your email subscribed
 const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || "*";
 
 const ddb = DynamoDBDocumentClient.from(new DynamoDBClient({}));
-const ses = new SESClient({});
+const sns = new SNSClient({});
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -96,39 +100,38 @@ export const handler = async (event) => {
     return response(500, { error: "Could not save signup." });
   }
 
-  // 2. Notify — never fail the signup if the email notification fails.
-  if (NOTIFY_TO && NOTIFY_FROM) {
+  // 2. Notify — never fail the signup if the notification fails.
+  if (NOTIFY_TOPIC_ARN) {
     try {
       const source = attributionSummary(item);
-      await ses.send(
-        new SendEmailCommand({
-          Source: NOTIFY_FROM,
-          Destination: { ToAddresses: [NOTIFY_TO] },
-          Message: {
-            Subject: { Data: `New waitlist signup: ${email}` },
-            Body: {
-              Text: {
-                Data: [
-                  `New signup for the waitlist 🎉`,
-                  ``,
-                  `Email:     ${email}`,
-                  `Time:      ${item.createdAt}`,
-                  `Source:    ${source}`,
-                  `Landing:   ${item.landing_page || "—"}`,
-                  `Referrer:  ${item.referrer || "—"}`,
-                ].join("\n"),
-              },
-            },
-          },
+      const result = await sns.send(
+        new PublishCommand({
+          TopicArn: NOTIFY_TOPIC_ARN,
+          Subject: snsSubject(`New waitlist signup: ${email}`),
+          Message: [
+            `New signup for the waitlist.`,
+            ``,
+            `Email:     ${email}`,
+            `Time:      ${item.createdAt}`,
+            `Source:    ${source}`,
+            `Landing:   ${item.landing_page || "-"}`,
+            `Referrer:  ${item.referrer || "-"}`,
+          ].join("\n"),
         })
       );
+      console.log("Notification published:", result.MessageId);
     } catch (err) {
-      console.error("SES notify error (signup still saved):", err);
+      console.error("SNS notify error (signup still saved):", err);
     }
   }
 
   return response(200, { ok: true });
 };
+
+// SNS email subjects must be printable ASCII, one line, at most 100 chars.
+function snsSubject(s) {
+  return s.replace(/[^\x20-\x7E]/g, "?").slice(0, 100);
+}
 
 function attributionSummary(item) {
   const parts = [];

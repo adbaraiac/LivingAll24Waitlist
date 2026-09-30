@@ -2,19 +2,15 @@ AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: >
   Waitlist backend for the LivingAll24 landing page.
-  API Gateway (HTTP API) -> Lambda -> DynamoDB, with an SES email notification
+  API Gateway (HTTP API) -> Lambda -> DynamoDB, with an SNS email notification
   on every signup.
 
 Parameters:
   NotifyEmail:
     Type: String
-    Description: Email address that receives a notification on each signup (must be SES-verified).
-  SenderEmail:
-    Type: String
-    Default: ""
     Description: >
-      Optional. The SES-verified "From" address for notifications. If blank,
-      NotifyEmail is used as both sender and recipient (works once verified).
+      Email address that receives a notification on each signup. AWS sends a
+      "Subscription Confirmation" email to it on first deploy; click the link.
   AllowedOrigin:
     Type: String
     Default: "*"
@@ -22,14 +18,11 @@ Parameters:
       The site origin allowed to call the API (CORS), e.g.
       https://<user>.github.io . Use "*" only while testing.
 
-Conditions:
-  HasSender: !Not [!Equals [!Ref SenderEmail, ""]]
-
 Globals:
   Function:
     Timeout: 10
     MemorySize: 128
-    Runtime: nodejs20.x
+    Runtime: nodejs24.x
 
 Resources:
   WaitlistTable:
@@ -44,6 +37,20 @@ Resources:
         - AttributeName: email
           KeyType: HASH
 
+  # Signup alerts. SNS email comes from AWS's own authenticated domain, so it
+  # lands in the inbox (SES from a gmail.com sender gets spam-filtered).
+  NotifyTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      DisplayName: Waitlist
+
+  NotifySubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      TopicArn: !Ref NotifyTopic
+      Protocol: email
+      Endpoint: !Ref NotifyEmail
+
   WaitlistFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -52,16 +59,13 @@ Resources:
       Environment:
         Variables:
           TABLE_NAME: !Ref WaitlistTable
-          NOTIFY_EMAIL: !Ref NotifyEmail
-          SENDER_EMAIL: !If [HasSender, !Ref SenderEmail, !Ref NotifyEmail]
+          NOTIFY_TOPIC_ARN: !Ref NotifyTopic
           ALLOWED_ORIGIN: !Ref AllowedOrigin
       Policies:
         - DynamoDBWritePolicy:
             TableName: !Ref WaitlistTable
-        - Statement:
-            - Effect: Allow
-              Action: ses:SendEmail
-              Resource: "*"
+        - SNSPublishMessagePolicy:
+            TopicName: !GetAtt NotifyTopic.TopicName
       Events:
         Post:
           Type: HttpApi

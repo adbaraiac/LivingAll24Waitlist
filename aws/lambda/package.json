@@ -1,7 +1,7 @@
 {
   "name": "livingall24-waitlist-fn",
   "version": "1.0.0",
-  "description": "Waitlist signup Lambda. AWS SDK v3 is provided by the Node.js 20 runtime, so there are no dependencies to install.",
+  "description": "Waitlist signup Lambda. AWS SDK v3 is provided by the Node.js 24 runtime, so there are no dependencies to install.",
   "type": "module",
   "private": true
 }

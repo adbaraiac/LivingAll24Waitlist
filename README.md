@@ -5,7 +5,7 @@ Built with **Next.js 15 + React 19 + TypeScript + Tailwind CSS**, output as a
 fully static site (deployable to GitHub Pages, S3, Netlify, Vercel — anything).
 
 The waitlist form stores signups in **AWS DynamoDB** and **emails you** on every
-signup via **AWS SES**.
+signup via **AWS SNS**.
 
 ---
 
@@ -77,7 +77,7 @@ src/
     ovr.ts            # OVR tier colors/labels
 
 aws/
-  lambda/index.mjs    # signup handler (DynamoDB + SES)
+  lambda/index.mjs    # signup handler (DynamoDB + SNS email alert)
   template.yaml       # one-command infra (API Gateway + Lambda + DynamoDB)
 
 .github/workflows/deploy.yml   # build + deploy to GitHub Pages
