@@ -1,0 +1,63 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Only one deploy at a time; don't cancel an in-progress run.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build static site
+        env:
+          # Repo/site config. Set in:
+          #   Settings > Secrets and variables > Actions > Variables
+          #   - WAITLIST_ENDPOINT: your AWS API Gateway URL (required)
+          #   - BASE_PATH: optional override. Defaults to "/<repo-name>", which is
+          #     what GitHub Pages project sites need. For a custom domain, set
+          #     BASE_PATH to "/" and it is treated as the root.
+          #   - SITE_URL: optional override for share previews. Defaults to
+          #     https://<owner>.github.io/<repo-name>. Set it for a custom domain.
+          NEXT_PUBLIC_BASE_PATH: ${{ vars.BASE_PATH || format('/{0}', github.event.repository.name) }}
+          NEXT_PUBLIC_SITE_URL: ${{ vars.SITE_URL || format('https://{0}.github.io/{1}', github.repository_owner, github.event.repository.name) }}
+          NEXT_PUBLIC_WAITLIST_ENDPOINT: ${{ vars.WAITLIST_ENDPOINT }}
+        run: npm run build
+
+      # Next.js static export writes to ./out — tell Pages not to run Jekyll.
+      - name: Add .nojekyll
+        run: touch out/.nojekyll
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

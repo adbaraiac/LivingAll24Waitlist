@@ -1,0 +1,112 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background-color: #0a0b0d;
+  color: #f5f6f7;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+/* Tabular numerals so big stats don't jitter while counting up. */
+.tabular {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+@layer components {
+  .container-page {
+    @apply mx-auto w-full max-w-6xl px-5 sm:px-6;
+  }
+
+  .glass {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .card {
+    @apply rounded-2xl border border-line bg-surface;
+  }
+
+  .btn-accent {
+    @apply inline-flex items-center justify-center rounded-xl bg-accent px-6 py-3.5
+           font-semibold text-black transition-all duration-200
+           hover:bg-accent-soft active:scale-[0.98]
+           focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2
+           focus-visible:outline-accent disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .eyebrow {
+    @apply inline-flex items-center gap-2 rounded-full border border-line
+           bg-white/[0.03] px-3 py-1 text-xs font-medium uppercase tracking-[0.14em] text-muted;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    background: linear-gradient(180deg, #ffffff 0%, #b9bec6 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .accent-glow {
+    background:
+      radial-gradient(600px 300px at 50% -10%, rgba(180, 255, 57, 0.14), transparent 70%);
+  }
+
+  /* subtle top grid / vignette for the page background */
+  .bg-grid {
+    background-image:
+      radial-gradient(1000px 600px at 50% -200px, rgba(180, 255, 57, 0.08), transparent 60%),
+      linear-gradient(180deg, #0a0b0d 0%, #0a0b0d 100%);
+  }
+}
+
+/* Reveal-on-scroll base state (JS adds the visible class). */
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s ease;
+  will-change: opacity, transform;
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Nicer autofill on dark inputs */
+input:-webkit-autofill,
+input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #f5f6f7;
+  -webkit-box-shadow: 0 0 0px 1000px rgba(255, 255, 255, 0.04) inset;
+  transition: background-color 5000s ease-in-out 0s;
+}

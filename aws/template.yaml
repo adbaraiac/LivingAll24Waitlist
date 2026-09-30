@@ -1,0 +1,92 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Waitlist backend for the LivingAll24 landing page.
+  API Gateway (HTTP API) -> Lambda -> DynamoDB, with an SES email notification
+  on every signup.
+
+Parameters:
+  NotifyEmail:
+    Type: String
+    Description: Email address that receives a notification on each signup (must be SES-verified).
+  SenderEmail:
+    Type: String
+    Default: ""
+    Description: >
+      Optional. The SES-verified "From" address for notifications. If blank,
+      NotifyEmail is used as both sender and recipient (works once verified).
+  AllowedOrigin:
+    Type: String
+    Default: "*"
+    Description: >
+      The site origin allowed to call the API (CORS), e.g.
+      https://<user>.github.io . Use "*" only while testing.
+
+Conditions:
+  HasSender: !Not [!Equals [!Ref SenderEmail, ""]]
+
+Globals:
+  Function:
+    Timeout: 10
+    MemorySize: 128
+    Runtime: nodejs20.x
+
+Resources:
+  WaitlistTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "${AWS::StackName}-signups"
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: email
+          AttributeType: S
+      KeySchema:
+        - AttributeName: email
+          KeyType: HASH
+
+  WaitlistFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.handler
+      CodeUri: lambda/
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref WaitlistTable
+          NOTIFY_EMAIL: !Ref NotifyEmail
+          SENDER_EMAIL: !If [HasSender, !Ref SenderEmail, !Ref NotifyEmail]
+          ALLOWED_ORIGIN: !Ref AllowedOrigin
+      Policies:
+        - DynamoDBWritePolicy:
+            TableName: !Ref WaitlistTable
+        - Statement:
+            - Effect: Allow
+              Action: ses:SendEmail
+              Resource: "*"
+      Events:
+        Post:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref WaitlistApi
+            Path: /waitlist
+            Method: POST
+
+  WaitlistApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      CorsConfiguration:
+        AllowOrigins:
+          - !Ref AllowedOrigin
+        AllowMethods:
+          - POST
+          - OPTIONS
+        AllowHeaders:
+          - Content-Type
+
+Outputs:
+  WaitlistEndpoint:
+    Description: >
+      Set this as NEXT_PUBLIC_WAITLIST_ENDPOINT in the site's build config.
+    Value: !Sub "https://${WaitlistApi}.execute-api.${AWS::Region}.amazonaws.com/waitlist"
+  TableName:
+    Description: DynamoDB table holding signups.
+    Value: !Ref WaitlistTable
