@@ -8,9 +8,17 @@ export function Footer() {
           {site.name}
           <span className="text-accent">.</span>
         </span>
-        <p className="text-xs text-faint">
-          © {new Date().getFullYear()} {site.name}. {site.status}.
-        </p>
+        <div className="flex items-center gap-5 text-xs text-faint">
+          <a href={`${site.basePath}/privacy/`} className="hover:text-ink">
+            Privacy
+          </a>
+          <a href={`${site.basePath}/terms/`} className="hover:text-ink">
+            Terms
+          </a>
+          <span>
+            © {new Date().getFullYear()} {site.name}. {site.status}.
+          </span>
+        </div>
       </div>
     </footer>
   );

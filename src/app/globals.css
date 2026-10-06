@@ -110,3 +110,34 @@ input:-webkit-autofill:focus {
   -webkit-box-shadow: 0 0 0px 1000px rgba(255, 255, 255, 0.04) inset;
   transition: background-color 5000s ease-in-out 0s;
 }
+
+/* Legal pages (privacy, terms): readable long-form text */
+.legal h2 {
+  margin-top: 2.25rem;
+  font-family: var(--font-sora), var(--font-inter), sans-serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #f5f6f7;
+}
+.legal p,
+.legal li {
+  margin-top: 0.75rem;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: #b9bec6;
+}
+.legal ul {
+  margin-top: 0.5rem;
+  padding-left: 1.25rem;
+  list-style: disc;
+}
+.legal li {
+  margin-top: 0.35rem;
+}
+.legal a {
+  color: #b4ff39;
+  text-decoration: underline;
+}
+.legal strong {
+  color: #f5f6f7;
+}
