@@ -64,9 +64,12 @@ export default function PrivacyPage() {
 
       <h2>What your friends can see</h2>
       <p>
-        Only people you add as friends (by friend code) can see your display name, profile photo, player card and OVR, and
-        your weekly leaderboard stats: consistency, steps, workouts, focus minutes, and XP. They can&apos;t see your
-        missions, goals, or answers.
+        Only people you add as friends can see your player card and OVR, and your weekly leaderboard stats: consistency,
+        steps, workouts, focus minutes, and XP. They can&apos;t see your missions, goals, or answers.
+      </p>
+      <p>
+        So friends can find you, other signed-in users can see your display name and profile photo when they search by
+        name, and in &quot;suggested friends&quot; if you share a friend or a group. Nothing else about you is shown there.
       </p>
 
       <h2>The AI glow-up (optional)</h2>
