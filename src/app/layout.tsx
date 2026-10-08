@@ -53,7 +53,7 @@ export const metadata: Metadata = {
     images: [ogImage],
   },
   icons: {
-    icon: [{ url: asset("favicon.svg"), type: "image/svg+xml" }],
+    icon: [{ url: asset("favicon.png"), type: "image/png", sizes: "64x64" }],
     apple: [{ url: asset("apple-touch-icon.png"), sizes: "180x180" }],
   },
   robots: { index: true, follow: true },
