@@ -21,7 +21,7 @@ export const site = {
   /** Where the "not launched yet" status is communicated. */
   status: "Coming soon",
   /** Contact address on the Privacy Policy and Terms. Swap for a domain address once you have one. */
-  contactEmail: "adbaraiac04@gmail.com",
+  contactEmail: "support@livingall24.com",
 } as const;
 
 export type Site = typeof site;

@@ -9,6 +9,9 @@ export function Footer() {
           <span className="text-accent">.</span>
         </span>
         <div className="flex items-center gap-5 text-xs text-faint">
+          <a href={`${site.basePath}/support/`} className="hover:text-ink">
+            Support
+          </a>
           <a href={`${site.basePath}/privacy/`} className="hover:text-ink">
             Privacy
           </a>
