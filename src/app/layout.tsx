@@ -24,6 +24,8 @@ const ogImage = `${site.url}/og.png`;
 const asset = (file: string) => `${site.basePath}/${file}`;
 
 export const metadata: Metadata = {
+  // Safari on iPhone shows Apple's "Open / Get" banner for the app.
+  itunes: { appId: site.appStoreId },
   metadataBase: new URL(site.url),
   title,
   description: site.description,

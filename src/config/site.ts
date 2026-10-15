@@ -18,8 +18,12 @@ export const site = {
   url: (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/+$/, ""),
   /** Sub-path the site is served from ("" at a domain root). */
   basePath: (process.env.NEXT_PUBLIC_BASE_PATH || "").replace(/\/+$/, ""),
-  /** Where the "not launched yet" status is communicated. */
-  status: "Coming soon",
+  /** Launch status, shown in the footer. */
+  status: "Available on the App Store",
+  /** The App Store listing. */
+  appStoreUrl: "https://apps.apple.com/us/app/livingall24/id6819865744",
+  /** Numeric App Store id (Safari's Smart App Banner). */
+  appStoreId: "6819865744",
   /** Contact address on the Privacy Policy and Terms. Swap for a domain address once you have one. */
   contactEmail: "support@livingall24.com",
 } as const;

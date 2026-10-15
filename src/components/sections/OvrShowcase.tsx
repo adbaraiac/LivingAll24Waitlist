@@ -13,9 +13,9 @@ const STAGES = [
     caption: "Month 1",
     cats: [
       { label: "Fitness", value: 61 },
-      { label: "Career", value: 58 },
-      { label: "Money", value: 55 },
-      { label: "Discipline", value: 60 },
+      { label: "Mind", value: 58 },
+      { label: "Wealth", value: 55 },
+      { label: "Social", value: 60 },
     ],
   },
   {
@@ -23,9 +23,9 @@ const STAGES = [
     caption: "Month 3",
     cats: [
       { label: "Fitness", value: 74 },
-      { label: "Career", value: 68 },
-      { label: "Money", value: 66 },
-      { label: "Discipline", value: 73 },
+      { label: "Mind", value: 68 },
+      { label: "Wealth", value: 66 },
+      { label: "Social", value: 73 },
     ],
   },
   {
@@ -33,9 +33,9 @@ const STAGES = [
     caption: "Month 6",
     cats: [
       { label: "Fitness", value: 85 },
-      { label: "Career", value: 79 },
-      { label: "Money", value: 76 },
-      { label: "Discipline", value: 84 },
+      { label: "Mind", value: 79 },
+      { label: "Wealth", value: 76 },
+      { label: "Social", value: 84 },
     ],
   },
 ];

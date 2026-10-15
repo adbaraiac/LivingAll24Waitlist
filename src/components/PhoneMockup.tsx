@@ -9,9 +9,9 @@ const OVR = 78;
 
 const CATEGORIES = [
   { label: "Fitness", value: 84 },
-  { label: "Career", value: 76 },
-  { label: "Money", value: 71 },
-  { label: "Discipline", value: 82 },
+  { label: "Mind", value: 76 },
+  { label: "Wealth", value: 71 },
+  { label: "Social", value: 82 },
 ];
 
 /**

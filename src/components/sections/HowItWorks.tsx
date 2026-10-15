@@ -22,7 +22,7 @@ const STEPS = [
   {
     n: "04",
     title: "Compete with friends",
-    body: "Start a private league and see who stacks the most XP each week.",
+    body: "Add your friends and race on weekly leaderboards: consistency, steps, workouts, focus and XP.",
     visual: <CompeteVisual />,
   },
 ];

@@ -22,7 +22,7 @@ export function FriendCompetition() {
                   This week
                 </p>
                 <span className="rounded-full bg-white/[0.05] px-3 py-1 text-xs text-muted">
-                  Resets Sunday
+                  Resets Monday
                 </span>
               </div>
 
@@ -79,16 +79,16 @@ export function FriendCompetition() {
 
           {/* copy */}
           <Reveal delay={120} className="text-center lg:text-left">
-            <span className="eyebrow">Private leagues</span>
+            <span className="eyebrow">Friends & leaderboards</span>
             <h2 className="mt-4 font-display text-3xl font-bold tracking-tight text-ink sm:text-4xl">
               Stop sending your friends motivational clips.
               <br className="hidden sm:block" />{" "}
               <span className="text-accent">Actually compete.</span>
             </h2>
             <p className="mx-auto mt-4 max-w-md text-base leading-relaxed text-muted sm:text-lg lg:mx-0">
-              Make a private group with your friends. The leaderboard ranks who
-              showed up most this week — pure XP and consistency. It resets every
-              week, so nobody coasts.
+              Add your friends with a link or by name. Weekly leaderboards rank
+              who showed up most: consistency, steps, workouts, focus and XP. They
+              reset every week, so nobody coasts.
             </p>
             <p className="mx-auto mt-4 max-w-md text-sm text-faint lg:mx-0">
               It&apos;s a race on effort, not a ranking of whose life is

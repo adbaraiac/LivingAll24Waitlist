@@ -44,7 +44,7 @@ export function AddFriend() {
           <p className="mt-6 text-sm text-faint">
             Their code: <span className="font-mono text-ink">{`${code.slice(0, 4)} ${code.slice(4)}`}</span>
           </p>
-          <a href={`${site.basePath}/`} className="mt-2 text-sm text-accent">
+          <a href={site.appStoreUrl} className="mt-2 text-sm text-accent">
             Don&apos;t have the app yet?
           </a>
         </>

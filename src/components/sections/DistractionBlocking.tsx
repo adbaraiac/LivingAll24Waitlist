@@ -23,7 +23,7 @@ export function DistractionBlocking() {
               Earn your distractions.
             </h2>
             <p className="mt-4 max-w-md text-base leading-relaxed text-muted sm:text-lg">
-              You pick the apps that eat your day and the habit that unlocks them.
+              You pick the apps that eat your day and the mission that unlocks them.
               Miss the habit, stay locked. Hit it, they open. You&apos;re in
               control — not the algorithm.
             </p>

@@ -1,5 +1,6 @@
 import { Hero } from "@/components/sections/Hero";
 import { Problem } from "@/components/sections/Problem";
+import { Screens } from "@/components/sections/Screens";
 import { OvrShowcase } from "@/components/sections/OvrShowcase";
 import { HowItWorks } from "@/components/sections/HowItWorks";
 import { DistractionBlocking } from "@/components/sections/DistractionBlocking";
@@ -12,6 +13,7 @@ export default function Home() {
   return (
     <main className="bg-grid min-h-screen">
       <Hero />
+      <Screens />
       <Problem />
       <OvrShowcase />
       <HowItWorks />
